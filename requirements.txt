@@ -4,3 +4,4 @@ transformers==5.13.0
 sentencepiece==0.2.2
 soundfile==0.14.0
 python-dotenv==1.2.2
+rich==13.7.1
