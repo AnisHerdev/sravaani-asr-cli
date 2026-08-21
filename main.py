@@ -1,4 +1,4 @@
-import sys, os, torch
+import sys, os, torch, argparse
 from transformers import AutoModel
 from dotenv import load_dotenv
 
@@ -16,16 +16,30 @@ model = AutoModel.from_pretrained(
     local_files_only=OFFLINE_MODE,
 ).to(DEV).eval()
 
-fpath = "Alaakaa_loovaa_unplugged_herdev.mp3"
-print(f"Transcribing file: {fpath}...")
-hyps = model.transcribe(fpath, return_hypotheses=True)
-for path, h in zip(sys.argv[1:], hyps):
-    print(f"{path}\t{h.text}")
+DEFAULT_AUDIO = "Alaakaa_loovaa_unplugged_herdev.mp3"
 
-# --- lower-level alternative (explicit processor) ---
-# from transformers import AutoProcessor
-# import soundfile as sf   # or: import wave (stdlib) for PCM WAV
-# proc = AutoProcessor.from_pretrained(REPO, trust_remote_code=True)
-# wav, sr = sf.read(path, dtype="float32")   # average channels if stereo
-# inputs = proc(wav, sampling_rate=sr, return_tensors="pt").to(DEV)
-# text = proc.batch_decode(model.generate(**inputs))[0]
+
+def parse_args(argv=None):
+    p = argparse.ArgumentParser(description="SraVaani speech-to-text")
+    p.add_argument("audio", nargs="*", default=[DEFAULT_AUDIO],
+                   help=f"audio files (default: {DEFAULT_AUDIO})")
+    return p.parse_args(argv)
+
+
+def main(argv=None):
+    args = parse_args(argv)
+    for path in args.audio:
+        print(f"Transcribing file: {path}...")
+    hyps = model.transcribe(args.audio, return_hypotheses=True)
+    for path, h in zip(args.audio, hyps):
+        print(f"{path}\t{h.text}")
+
+
+if __name__ == "__main__":
+    try:
+        import sys
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+    main()
