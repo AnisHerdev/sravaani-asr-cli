@@ -38,57 +38,36 @@ def get_audio_duration(path: str) -> float:
     return info.frames / info.samplerate
 
 def _render_transcripts_table(console: Console, args, hyps):
-    """Render transcriptions as a responsive table, or Panels if terminal is too narrow."""
+    """Render transcriptions with file name as title and transcript spanning full width."""
     term_width = console.size.width
-    # Margin from terminal edges (chars on each side)
     MARGIN = 4
-    table_width = max(60, term_width - 2 * MARGIN)
-
-    # Use Panels for very narrow terminals (< 70 chars) - table borders break badly
-    if term_width < 70:
-        console.print()
-        for path, hyp in zip(args.audio, hyps):
-            console.print(Panel(
-                hyp.text,
-                title=f"[bold cyan]{os.path.basename(path)}[/bold cyan]",
-                border_style="green",
-                expand=False,
-                padding=(1, 2)
-            ))
-        return
-
-    # Normal: use table with responsive column sizing
-    transcript_table = Table(
-        title="Transcriptions",
-        show_header=True,
-        header_style="bold green",
-        expand=False,
-        width=table_width,
-        min_width=60,
-        box=box.HORIZONTALS,
-    )
-    transcript_table.add_column(
-        "File",
-        style="cyan",
-        no_wrap=True,
-        min_width=20,
-        max_width=30,
-    )
-    transcript_table.add_column(
-        "Transcript",
-        style="white",
-        max_width=120,
-        min_width=30,
-        overflow="fold",
-        no_wrap=False,
-        ratio=1,
-    )
-
-    for path, hyp in zip(args.audio, hyps):
-        transcript_table.add_row(os.path.basename(path), hyp.text)
+    content_width = max(60, term_width - 2 * MARGIN)
 
     console.print()
-    console.print(transcript_table)
+    for path, hyp in zip(args.audio, hyps):
+        filename = os.path.basename(path)
+        # Title row
+        title_table = Table(
+            show_header=False,
+            box=box.HORIZONTALS,
+            width=content_width,
+            min_width=60,
+        )
+        title_table.add_column("Title", style="bold cyan", no_wrap=True, overflow="ellipsis")
+        title_table.add_row(filename)
+        console.print(title_table)
+
+        # Transcript row - full width
+        transcript_table = Table(
+            show_header=False,
+            box=box.HORIZONTALS,
+            width=content_width,
+            min_width=60,
+        )
+        transcript_table.add_column("Transcript", style="white", overflow="fold", no_wrap=False, ratio=1)
+        transcript_table.add_row(hyp.text)
+        console.print(transcript_table)
+        console.print()  # spacing between files
 
 
 def _render_metrics_table(console: Console, args, durations, hyps, elapsed):
