@@ -6,6 +6,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich.text import Text
+from rich import box
 
 load_dotenv()
 
@@ -36,7 +37,6 @@ def get_audio_duration(path: str) -> float:
     info = sf.info(path)
     return info.frames / info.samplerate
 
-
 def _render_transcripts_table(console: Console, args, hyps):
     """Render transcriptions as a responsive table, or Panels if terminal is too narrow."""
     term_width = console.size.width
@@ -65,6 +65,7 @@ def _render_transcripts_table(console: Console, args, hyps):
         expand=False,
         width=table_width,
         min_width=60,
+        box=box.HORIZONTALS,
     )
     transcript_table.add_column(
         "File",
