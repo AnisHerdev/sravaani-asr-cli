@@ -71,12 +71,16 @@ def main(argv=None):
 
     console.print(table)
 
-    # Print transcripts
-    console.print()  # blank line
+    # Transcript table
+    transcript_table = Table(title="Transcriptions", show_header=True, header_style="bold green")
+    transcript_table.add_column("File", style="cyan", no_wrap=True)
+    transcript_table.add_column("Transcript", style="white", max_width=100, overflow="fold", no_wrap=False)
+
     for path, hyp in zip(args.audio, hyps):
-        console.print(f"[bold]{os.path.basename(path)}[/bold]")
-        console.print(hyp.text)
-        console.print()
+        transcript_table.add_row(os.path.basename(path), hyp.text)
+
+    console.print()
+    console.print(transcript_table)
 
 
 if __name__ == "__main__":
