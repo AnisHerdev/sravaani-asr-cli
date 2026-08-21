@@ -1,19 +1,22 @@
-import sys, torch
+import sys, os, torch
 from transformers import AutoModel
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-DOWNLOAD_MODEL=True
+access_token = os.environ.get("HF_TOKEN")
+OFFLINE_MODE = os.getenv("OFFLINE_MODE", "0").strip().lower() in ("1", "true", "yes")
 
-if DOWNLOAD_MODEL:
-access_token=os.environ.get("HF_TOKEN")
 REPO = "ARTPARK-IISc/SraVaani-1.0"
 DEV = "cuda" if torch.cuda.is_available() else "cpu"
-model = AutoModel.from_pretrained(REPO, trust_remote_code=True,token=access_token).to(DEV).eval()
+model = AutoModel.from_pretrained(
+    REPO,
+    trust_remote_code=True,
+    token=access_token,
+    local_files_only=OFFLINE_MODE,
+).to(DEV).eval()
 
-fpath="Alaakaa_loovaa_unplugged_herdev.mp3"
+fpath = "Alaakaa_loovaa_unplugged_herdev.mp3"
 hyps = model.transcribe(fpath, return_hypotheses=True)
 for path, h in zip(sys.argv[1:], hyps):
     print(f"{path}\t{h.text}")
