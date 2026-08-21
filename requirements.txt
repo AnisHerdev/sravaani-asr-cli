@@ -1,0 +1,6 @@
+# Core ASR stack (tested with these versions)
+torch==2.12.1
+transformers==5.13.0
+sentencepiece==0.2.2
+soundfile==0.14.0
+python-dotenv==1.2.2
