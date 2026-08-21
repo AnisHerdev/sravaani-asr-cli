@@ -40,6 +40,10 @@ def get_audio_duration(path: str) -> float:
 def _render_transcripts_table(console: Console, args, hyps):
     """Render transcriptions as a responsive table, or Panels if terminal is too narrow."""
     term_width = console.size.width
+    # Margin from terminal edges (chars on each side)
+    MARGIN = 4
+    table_width = max(60, term_width - 2 * MARGIN)
+
     # Use Panels for very narrow terminals (< 70 chars) - table borders break badly
     if term_width < 70:
         console.print()
@@ -58,8 +62,9 @@ def _render_transcripts_table(console: Console, args, hyps):
         title="Transcriptions",
         show_header=True,
         header_style="bold green",
-        expand=True,  # Use full terminal width
-        min_width=60,  # Don't shrink below this
+        expand=False,
+        width=table_width,
+        min_width=60,
     )
     transcript_table.add_column(
         "File",
@@ -75,7 +80,7 @@ def _render_transcripts_table(console: Console, args, hyps):
         min_width=30,
         overflow="fold",
         no_wrap=False,
-        ratio=1,  # Take remaining space
+        ratio=1,
     )
 
     for path, hyp in zip(args.audio, hyps):
@@ -88,12 +93,15 @@ def _render_transcripts_table(console: Console, args, hyps):
 def _render_metrics_table(console: Console, args, durations, hyps, elapsed):
     """Render metrics table with responsive sizing."""
     term_width = console.size.width
+    MARGIN = 4
+    table_width = max(50, term_width - 2 * MARGIN)
 
     table = Table(
         title="SraVaani Transcription Results",
         show_header=True,
         header_style="bold cyan",
-        expand=True,
+        expand=False,
+        width=table_width,
         min_width=50,
     )
     table.add_column("File", style="white", min_width=15, max_width=35, overflow="ellipsis", no_wrap=False)
